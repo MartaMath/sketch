@@ -2,7 +2,10 @@ import cv2
 import os
 import argparse
 import shutil
-#import filetype
+
+# table of formats supports in OpenCv ver. 4.6.0
+supported_formats=['.bmp', '.dib', '.jpg', '.jpeg', '.jpe', '.jp2', '.png', '.webp', '.pbm', '.pgm', '.ppm', '.pxm', '.pfm', '.sr', '.ras', '.tiff', '.tif', '.exr', '.hdr', '.pic']
+
 
 def main():
     parser = argparse.ArgumentParser(description='Sketch from photo', add_help=False)
@@ -32,17 +35,16 @@ def main():
     os.makedirs(path_out) 
     
     for filename in os.listdir(path_in):
-        print(filename)
         file=os.path.join(path_in,filename)
         
-        #todo add checking jpg 
         if os.path.isfile(file):
-            #if filetype.is_image(filename):
-            filename = os.path.basename(file)
             file_extention = os.path.splitext(filename)[1]
-            file_name = f'{os.path.splitext(filename)[0]}_sketch{file_extention}'
-            file_out = os.path.join(path_out, file_name)
-            image_to_sketch(file, file_out, k_size=23)
+            file_out = os.path.join(path_out, f'{os.path.splitext(filename)[0]}_sketch{file_extention}')
+
+            for format in supported_formats:
+                if file_extention == format:
+                    print('Making sketch for', filename)
+                    image_to_sketch(file, file_out, k_size=23)
 
 
 def image_to_sketch(file_in, file_out, k_size):
@@ -81,7 +83,6 @@ def image_to_sketch(file_in, file_out, k_size):
     sketch_img=cv2.divide(grey_img,invblur_img, scale=260.0)
 
     # Save Sketch
-        
     cv2.imwrite(file_out, sketch_img)
 
 if __name__ == '__main__':
