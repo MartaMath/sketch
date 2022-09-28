@@ -3,23 +3,32 @@ import os
 import argparse
 import shutil
 
+# defoault Gaussian Karnek Size
+default_k_size = 23
+
 # table of formats supports in OpenCv ver. 4.6.0
-supported_formats=['.bmp', '.dib', '.jpg', '.jpeg', '.jpe', '.jp2', '.png', '.webp', '.pbm', '.pgm', '.ppm', '.pxm', '.pfm', '.sr', '.ras', '.tiff', '.tif', '.exr', '.hdr', '.pic']
+supported_formats = ['.bmp', '.dib', '.jpg', '.jpeg', '.jpe', '.jp2', '.png', '.webp', '.pbm', '.pgm', '.ppm', '.pxm', '.pfm', '.sr', '.ras', '.tiff', '.tif', '.exr', '.hdr', '.pic']
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Sketch from photo', add_help=False)
-    parser._optionals.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Print this help and exit.')
-    parser._positionals.add_argument('-i', '--input-dir', help='Input path dir.', required=True, metavar='DIR')
-    parser._optionals.add_argument('-o', '--output-dir', help='Output path dir', required=False, metavar='DIR')
-    
+    parser = argparse.ArgumentParser(description='Sketch from photo', add_help = False)
+    parser._optionals.add_argument('-h', '--help', action = 'help', default = argparse.SUPPRESS, help = 'Print this help and exit.')
+    parser._positionals.add_argument('-i', '--input-dir', help = 'Input path dir.', required = True, metavar = 'DIR')
+    parser._optionals.add_argument('-o', '--output-dir', help = 'Output path dir', required = False, metavar = 'DIR')
+    parser._optionals.add_argument('-k', '--k-size', help = 'Gaussian Kernel Size, must be odd number',default = default_k_size, type = int, required = False, metavar = 'NUM')
+
     parser._positionals.title = 'Required'
     parser._optionals.title = 'Optional'
 
     args=parser.parse_args()
-    print (args)
+    print (args, '\n')
     print('Input dir: ', args.input_dir)
     print('Output dir: ', args.output_dir)
+    print ('\n')
+
+    if not (args.k_size >0 and args.k_size % 2 == 1):
+        print('k_size must be odd number')
+        exit()
 
     path_in = args.input_dir
 
@@ -44,7 +53,7 @@ def main():
             for format in supported_formats:
                 if file_extention == format:
                     print('Making sketch for', filename)
-                    image_to_sketch(file, file_out, k_size=23)
+                    image_to_sketch(file, file_out, args.k_size)
 
 
 def image_to_sketch(file_in, file_out, k_size):
