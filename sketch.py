@@ -1,7 +1,7 @@
 import cv2
 import os
 import argparse
-import shutil
+from datetime import datetime
 
 # defoault Gaussian Karnek Size
 default_k_size = 23
@@ -14,8 +14,9 @@ def main():
     parser = argparse.ArgumentParser(description='Sketch from photo', add_help = False)
     parser._optionals.add_argument('-h', '--help', action = 'help', default = argparse.SUPPRESS, help = 'Print this help and exit.')
     parser._positionals.add_argument('-i', '--input-dir', help = 'Input path dir.', required = True, metavar = 'DIR')
-    parser._optionals.add_argument('-o', '--output-dir', help = 'Output path dir', required = False, metavar = 'DIR')
+    parser._optionals.add_argument('-o', '--output-dir', help = 'Output path dir will be created by this script', required = False, metavar = 'DIR')
     parser._optionals.add_argument('-k', '--k-size', help = 'Gaussian Kernel Size, must be odd number',default = default_k_size, type = int, required = False, metavar = 'NUM')
+    parser._optionals.add_argument('--overwrite', help = 'Use 1 if you want to overwrite existed files, default:0', nargs = '?', const = 0, default = 0, type = int, required = False)
 
     parser._positionals.title = 'Required'
     parser._optionals.title = 'Optional'
@@ -24,9 +25,8 @@ def main():
     print (args, '\n')
     print('Input dir: ', args.input_dir)
     print('Output dir: ', args.output_dir)
-    print ('\n')
-
-    if not (args.k_size >0 and args.k_size % 2 == 1):
+    
+    if not (args.k_size > 0 and args.k_size % 2 == 1):
         print('k_size must be odd number')
         exit()
 
@@ -35,24 +35,26 @@ def main():
     if args.output_dir:
         path_out = args.output_dir
     else:
-        output_name = 'edited'
+        output_name = datetime.today().strftime('%Y_%m_%d_%H%M%S')
         path_out = os.path.join(path_in, output_name)
         
     if os.path.exists(path_out):
-        shutil.rmtree(path_out)
-    
-    os.makedirs(path_out) 
+        if not args.overwrite:
+            print("Output directory exists. To overwrite it use \"--overwrite 1\"")
+            exit()
+    else:
+        os.makedirs(path_out) 
     
     for filename in os.listdir(path_in):
-        file=os.path.join(path_in,filename)
+        file=os.path.join(path_in, filename)
         
         if os.path.isfile(file):
-            file_extention = os.path.splitext(filename)[1]
-            file_out = os.path.join(path_out, f'{os.path.splitext(filename)[0]}_sketch{file_extention}')
+            file_extension = os.path.splitext(filename)[1]
+            file_out = os.path.join(path_out, f'{os.path.splitext(filename)[0]}_sketch{file_extension}')
 
             for format in supported_formats:
-                if file_extention == format:
-                    print('Making sketch for', filename)
+                if file_extension == format:
+                    print('Making sketch for: ', filename)
                     image_to_sketch(file, file_out, args.k_size)
 
 
